@@ -71,6 +71,7 @@ CONFIG_OPTS = \
 	--enable-dhcp \
 	--enable-farp \
 	--enable-addrblock \
+	--enable-narrowid \
 	--enable-ctr \
 	--enable-ccm \
 	--enable-gcm \
