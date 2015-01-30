@@ -86,6 +86,7 @@ CONFIG_OPTS = \
 	--enable-ipseckey \
 	--enable-dnscert \
 	--enable-acert \
+	--enable-cga \
 	--enable-cmd \
 	--enable-libipsec \
 	--enable-kernel-libipsec \
