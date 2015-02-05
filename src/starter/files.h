@@ -27,6 +27,7 @@
 extern char *daemon_name;
 extern char *cmd;
 extern char *pid_file;
+extern char *ctl_file;
 
 #define DYNIP_DIR       IPSEC_PIDDIR "/dynip"
 

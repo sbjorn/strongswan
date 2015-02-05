@@ -139,6 +139,11 @@ int starter_start_charon (starter_config_t *cfg, bool no_fork, bool attach_gdb)
 	}
 	arg[argc++] = "--pid-file";
 	arg[argc++] = pid_file;
+	if (ctl_file)
+	{
+		arg[argc++] = "--ctl-file";
+		arg[argc++] = ctl_file;
+	}
 
 	/* parse debug string */
 	{
@@ -181,7 +186,14 @@ int starter_start_charon (starter_config_t *cfg, bool no_fork, bool attach_gdb)
 	}
 	else
 	{
-		unlink(CHARON_CTL_FILE);
+		if (ctl_file)
+		{
+			unlink(ctl_file);
+		}
+		else
+		{
+			unlink(CHARON_CTL_FILE);
+		}
 		_stop_requested = 0;
 
 		pid = fork();

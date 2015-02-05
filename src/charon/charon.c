@@ -16,6 +16,8 @@
  * for more details.
  */
 
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #define _POSIX_PTHREAD_SEMANTICS /* for two param sigwait on OpenSolaris */
 #include <signal.h>
@@ -284,6 +286,7 @@ static void usage(const char *msg)
 					"         [--version]\n"
 					"         [--use-syslog]\n"
 					"         [--pid-file <path to pid file>]\n"
+					"         [--ctl-file <path to stroke socket>]\n"
 					"         [--debug-<type> <level>]\n"
 					"           <type>:  log context type (dmn|mgr|ike|chd|job|cfg|knl|net|asn|enc|tnc|imc|imv|pts|tls|esp|lib)\n"
 					"           <level>: log verbosity (-1 = silent, 0 = audit, 1 = control,\n"
@@ -347,6 +350,7 @@ int main(int argc, char *argv[])
 			{ "version", no_argument, NULL, 'v' },
 			{ "use-syslog", no_argument, NULL, 'l' },
 			{ "pid-file", required_argument, NULL, 'p' },
+			{ "ctl-file", required_argument, NULL, 'c' },
 			/* TODO: handle "debug-all" */
 			{ "debug-dmn", required_argument, &group, DBG_DMN },
 			{ "debug-mgr", required_argument, &group, DBG_MGR },
@@ -368,6 +372,7 @@ int main(int argc, char *argv[])
 			{ 0,0,0,0 }
 		};
 
+		char *ctl_file = NULL;
 		int c = getopt_long(argc, argv, "", long_opts, NULL);
 		switch (c)
 		{
@@ -386,6 +391,14 @@ int main(int argc, char *argv[])
 				continue;
 			case 'p':
 				pid_file = optarg;
+				continue;
+			case 'c':
+				if (asprintf(&ctl_file, "unix://%s", optarg) > 0)
+				{
+					lib->settings->set_str(lib->settings, "charon.plugins.stroke.socket",
+										   ctl_file);
+					free(ctl_file);
+				}
 				continue;
 			case 0:
 				/* option is in group */

@@ -60,6 +60,7 @@ char *daemon_name = NULL;
 char *cmd = NULL;
 char *pid_file = NULL;
 char *starter_pid_file = NULL;
+char *ctl_file = NULL;
 
 static char *config_file = NULL;
 
@@ -403,6 +404,7 @@ static void usage(char *name)
 			"               [--attach-gdb] [--daemon <name>]\n"
 			"               [--pid-file <path to starter pid file>]\n"
 			"               [--daemon-pid-file <path to daemon pid file>]\n"
+			"               [--daemon-ctl-file <path to daemon stroke socket>]\n"
 			"               [--conf <path to ipsec.conf>]\n");
 	exit(LSB_RC_INVALID_ARGUMENT);
 }
@@ -484,6 +486,10 @@ int main (int argc, char **argv)
 			{
 				DBG1(DBG_APP, "unable to set daemon pid file path");
 			}
+		}
+		else if (streq(argv[i], "--daemon-ctl-file") && i+1 < argc)
+		{
+			ctl_file = argv[++i];
 		}
 		else if (streq(argv[i], "--conf") && i+1 < argc)
 		{
