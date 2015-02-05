@@ -363,12 +363,13 @@ static bool set_daemon_name()
 		 cmd = (char*)cmd_default;
 	}
 
-	if (asprintf(&pid_file, IPSEC_PIDDIR"/%s.pid", daemon_name) < 0)
+	if (!pid_file && asprintf(&pid_file, IPSEC_PIDDIR"/%s.pid", daemon_name) < 0)
 	{
 		 pid_file = (char*)pid_file_default;
 	}
 
-	if (asprintf(&starter_pid_file, IPSEC_PIDDIR"/starter.%s.pid",
+	if (!starter_pid_file &&
+		asprintf(&starter_pid_file, IPSEC_PIDDIR"/starter.%s.pid",
 				 daemon_name) < 0)
 	{
 		 starter_pid_file = (char*)starter_pid_file_default;
@@ -400,6 +401,8 @@ static void usage(char *name)
 	fprintf(stderr, "Usage: starter [--nofork] [--auto-update <sec>]\n"
 			"               [--debug|--debug-more|--debug-all|--nolog]\n"
 			"               [--attach-gdb] [--daemon <name>]\n"
+			"               [--pid-file <path to starter pid file>]\n"
+			"               [--daemon-pid-file <path to daemon pid file>]\n"
 			"               [--conf <path to ipsec.conf>]\n");
 	exit(LSB_RC_INVALID_ARGUMENT);
 }
@@ -467,6 +470,20 @@ int main (int argc, char **argv)
 		else if (streq(argv[i], "--daemon") && i+1 < argc)
 		{
 			daemon_name = argv[++i];
+		}
+		else if (streq(argv[i], "--pid-file") && i+1 < argc)
+		{
+			if (asprintf(&starter_pid_file, "%s", argv[++i]) < 0)
+			{
+				DBG1(DBG_APP, "unable to set starter pid file path");
+			}
+		}
+		else if (streq(argv[i], "--daemon-pid-file") && i+1 < argc)
+		{
+			if (asprintf(&pid_file, "%s", argv[++i]) < 0)
+			{
+				DBG1(DBG_APP, "unable to set daemon pid file path");
+			}
 		}
 		else if (streq(argv[i], "--conf") && i+1 < argc)
 		{

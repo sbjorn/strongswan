@@ -62,6 +62,11 @@
 static FILE *pidfile = NULL;
 
 /**
+ * Path to the PID file (may be overridden on command line)
+ */
+static char *pid_file = PID_FILE;
+
+/**
  * Log levels as defined via command line arguments
  */
 static level_t levels[DBG_MAX];
@@ -203,9 +208,9 @@ static bool check_pidfile()
 {
 	struct stat stb;
 
-	if (stat(PID_FILE, &stb) == 0)
+	if (stat(pid_file, &stb) == 0)
 	{
-		pidfile = fopen(PID_FILE, "r");
+		pidfile = fopen(pid_file, "r");
 		if (pidfile)
 		{
 			char buf[64];
@@ -223,12 +228,12 @@ static bool check_pidfile()
 				return TRUE;
 			}
 		}
-		DBG1(DBG_DMN, "removing pidfile '"PID_FILE"', process not running");
-		unlink(PID_FILE);
+		DBG1(DBG_DMN, "removing pidfile '%s', process not running", pid_file);
+		unlink(pid_file);
 	}
 
 	/* create new pidfile */
-	pidfile = fopen(PID_FILE, "w");
+	pidfile = fopen(pid_file, "w");
 	if (pidfile)
 	{
 		int fd;
@@ -236,8 +241,8 @@ static bool check_pidfile()
 		fd = fileno(pidfile);
 		if (fd == -1 || fcntl(fd, F_SETFD, FD_CLOEXEC) == -1)
 		{
-			DBG1(DBG_LIB, "setting FD_CLOEXEC for '"PID_FILE"' failed: %s",
-				 strerror(errno));
+			DBG1(DBG_LIB, "setting FD_CLOEXEC for '%s' failed: %s",
+				 pid_file, strerror(errno));
 		}
 		ignore_result(fchown(fileno(pidfile),
 							 lib->caps->get_uid(lib->caps),
@@ -262,7 +267,7 @@ static void unlink_pidfile()
 		ignore_result(ftruncate(fileno(pidfile), 0));
 		fclose(pidfile);
 	}
-	unlink(PID_FILE);
+	unlink(pid_file);
 }
 
 /**
@@ -278,6 +283,7 @@ static void usage(const char *msg)
 					"         [--help]\n"
 					"         [--version]\n"
 					"         [--use-syslog]\n"
+					"         [--pid-file <path to pid file>]\n"
 					"         [--debug-<type> <level>]\n"
 					"           <type>:  log context type (dmn|mgr|ike|chd|job|cfg|knl|net|asn|enc|tnc|imc|imv|pts|tls|esp|lib)\n"
 					"           <level>: log verbosity (-1 = silent, 0 = audit, 1 = control,\n"
@@ -340,6 +346,7 @@ int main(int argc, char *argv[])
 			{ "help", no_argument, NULL, 'h' },
 			{ "version", no_argument, NULL, 'v' },
 			{ "use-syslog", no_argument, NULL, 'l' },
+			{ "pid-file", required_argument, NULL, 'p' },
 			/* TODO: handle "debug-all" */
 			{ "debug-dmn", required_argument, &group, DBG_DMN },
 			{ "debug-mgr", required_argument, &group, DBG_MGR },
@@ -376,6 +383,9 @@ int main(int argc, char *argv[])
 				goto deinit;
 			case 'l':
 				use_syslog = TRUE;
+				continue;
+			case 'p':
+				pid_file = optarg;
 				continue;
 			case 0:
 				/* option is in group */

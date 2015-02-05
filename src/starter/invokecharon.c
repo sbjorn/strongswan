@@ -137,6 +137,8 @@ int starter_start_charon (starter_config_t *cfg, bool no_fork, bool attach_gdb)
 	{
 		arg[argc++] = "--use-syslog";
 	}
+	arg[argc++] = "--pid-file";
+	arg[argc++] = pid_file;
 
 	/* parse debug string */
 	{
