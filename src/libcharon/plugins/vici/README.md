@@ -861,7 +861,7 @@ code or the generated documentation.
 The _vici Python egg_ is a pure Python implementation of the VICI protocol to
 implement client applications. It is provided in the _python_ subdirectory, and
 gets built and installed if strongSwan has been _./configure_'d with
-_--enable-vici_ and _--enable-pyton-eggs_.
+_--enable-vici_ and _--enable-python-eggs_.
 
 The _vici_ module provides a _Session()_ constructor for a high level interface,
 the underlying classes are usually not required to build Python applications
@@ -887,17 +887,16 @@ is used:
 	import socket
 
 	s = socket.socket(socket.AF_UNIX)
-	s.connect("/var/run/charon.vici");
+	s.connect("/var/run/charon.vici")
 	v = vici.Session(s)
 
 ## A simple client request ##
 
 An example to print the daemon version information is as simple as:
 
-	x = v.version()
+	ver = v.version()
 
-	print "{}, {}, {}, {}, {}".format(
-		x["daemon"], x["version"], x["sysname"], x["release"], x["machine"])
+	print "{daemon} {version} ({sysname}, {release}, {machine})".format(**ver)
 
 ## A request with response iteration ##
 
@@ -907,7 +906,7 @@ provide more scalable object streaming. The following example lists all loaded
 connections using the _list-conns_ command and implicitly the _list-conn_ event:
 
 	for conn in v.list_conns():
-		for key in conn.iterkeys():
+		for key in conn:
 			print key
 
 ## Sorting in dictionaries ##
